@@ -1,9 +1,10 @@
-# angular2-tour-of-heroes
+# Angular 2 + TypeScript + Gulp
 
 Practicing setting up development environment with Angular2, Typescript and Gulp.
 
 - [5 MIN QUICKSTART](https://angular.io/docs/ts/latest/quickstart.html)
 - [QUICKSTART: ANGULAR2 WITH TYPESCRIPT AND GULP](http://blog.codeleak.pl/2016/03/quickstart-angular2-with-typescript-and.html)
+- https://github.com/mgechev/angular2-seed
 
 ==
 
@@ -30,22 +31,24 @@ project
 |          app.component.ts -> Main application component
 |          app.html         -> Main application template
 |          main.ts          -> Application bootstrap
-\---dist
-|   |   index.html
-|   |
-|   \---app   
+\---build
+    |   index.html
+    |
+    \---app          -> Compiled version of Application modules
+    |
+    \---vendor       -> Copy of necessary libraries
 ```
 
 ==
 
 ## Some Commands
-- The package.json file is the central location to define all the commands
+- The `package.json` file is the central location where all the commands are defined.
 
 ```bash
-npm run clean
-npm run compile
-npm run build
-npm run server
+npm run clean       #==> Delete build directory
+npm run compile     #==> Compile TypeScript
+npm run build       #==> Build the whole app from src to build
+npm run server      #==> Run the local server with live-upload
 npm run postinstall
 npm run tslint
 ```

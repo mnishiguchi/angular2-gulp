@@ -1,19 +1,42 @@
 "use strict";
 
-var gulp       = require( "gulp" );
-var del        = require( "del" );
+var gulp = require( "gulp" );
+
+// TypeScript.
 var tsc        = require( "gulp-typescript" );
-var sourcemaps = require( 'gulp-sourcemaps' );
 var tsProject  = tsc.createProject( "tsconfig.json" );
 var tslint     = require( 'gulp-tslint' );
 
+// Convert SCSS to CSS.
+var sass = require('gulp-sass');
+
+// Prefix CSS.
+var autoprefixer = require('gulp-autoprefixer');
+
+// Replace HTML tags with references.
+var useref = require('gulp-useref');
+
+// Run the tasks in the specific order.
+var runSequence = require('run-sequence');
+
+// Sourcemaps.
+var sourcemaps = require( 'gulp-sourcemaps' );
+
+// Cleaning.
+var del = require( "del" );
+
 
 /**
- * Remove build directory.
+ * Convert SCSS files to CSS, create sourcemaps, and save to in the build directory.
  */
-gulp.task( 'clean', function( cb ) {
-    return del( [ "build" ], cb );
-});
+gulp.task( 'sass2css', function() {
+  return gulp.src( 'src/app/**/*.scss' )   // Read a file.
+    .pipe( sourcemaps.init() )             // Process the original sources.
+    .pipe( sass() )                        // Convert SCSS to CSS.
+    .pipe( autoprefixer() )                // Add vender-prefixes.
+    .pipe( sourcemaps.write( "." ) )       // Write sourcemaps.
+    .pipe( gulp.dest( 'build/app' ) )      // Save the resulting file to the build directory.
+})
 
 
 /**
@@ -29,9 +52,9 @@ gulp.task( 'tslint', function() {
 
 
 /**
- * Compile TypeScript sources and create sourcemaps in build directory.
+ * Compile TypeScript sources, create sourcemaps, and save to in the build directory.
  */
-gulp.task( "compile", function() {
+gulp.task( "ts2js", function() {
   var tsResult = gulp.src( "src/**/*.ts" )
     .pipe( sourcemaps.init() )
     .pipe( tsc( tsProject ) );
@@ -42,19 +65,9 @@ gulp.task( "compile", function() {
 
 
 /**
- * Copy all resources that are not TypeScript files into build directory.
+ * Copy all required libraries into the build/vendor directory.
  */
-gulp.task( "resources", function() {
-  return gulp
-    .src([ "src/**/*", "!**/*.ts" ])
-    .pipe( gulp.dest( "build" ) )
-});
-
-
-/**
- * Copy all required libraries into build directory.
- */
-gulp.task( "libs", function() {
+gulp.task( "vendor", function() {
   return gulp.src([
       'es6-shim/es6-shim.min.js',
       'systemjs/dist/system-polyfills.js',
@@ -64,8 +77,23 @@ gulp.task( "libs", function() {
       'angular2/bundles/angular2.dev.js',
       'angular2/bundles/router.dev.js'
     ],
-    { cwd: "node_modules/**" }) /* Glob required here. */
-    .pipe( gulp.dest( "build/lib" ) );
+    { cwd: "node_modules/**" })
+    .pipe( gulp.dest( "build/vendor" ) );
+});
+
+
+/**
+ * Copy all the files other than TypeScript and SCSS files,
+ * and save to the build directory.
+ */
+gulp.task( "resources", function() {
+  return gulp
+    .src([
+      "src/**/*",    // All the files in the src directory.
+      "!**/*.scss",  // Exclude SCSS files.
+      "!**/*.ts"     // Exclude TypeScript files.
+    ])
+    .pipe( gulp.dest( "build" ) )
 });
 
 
@@ -74,23 +102,42 @@ gulp.task( "libs", function() {
  */
 gulp.task( 'watch', function () {
 
-  // Compile if there is a change in ts files.
-  gulp.watch( [ "src/**/*.ts" ], [ 'compile' ] )
+  // Compile if there is a change in TypeScript files.
+  gulp.watch( [ "src/**/*.ts" ], [ 'ts2js' ] )
     .on( 'change', function( e ) {
-        console.log(' TypeScript file ' + e.path + ' has been changed. Compiling.');
+      console.log(' TypeScript file ' + e.path + ' has been changed. Compiling...');
     });
 
-  // Compile if there is a change in html or css files.
+  // Compile if there is a change in SASS files.
+  gulp.watch( 'src/**/*.scss', [ 'sass2css' ] )
+    .on( 'change', function( e ) {
+      console.log(' SASS file ' + e.path + ' has been changed. Compiling...');
+    });
+
+  // Copy to the build direcory if there is a change in HTML or CSS files.
   gulp.watch( [ "src/**/*.html", "src/**/*.css" ], [ 'resources' ] )
     .on( 'change', function( e ) {
-      console.log( 'Resource file ' + e.path + ' has been changed. Updating.' );
+      console.log( 'Resource file ' + e.path + ' has been changed. Updating...' );
     });
+});
+
+
+/**
+ * Remove build directory.
+ */
+gulp.task( 'clean', function( done ) {
+    return del( [ "build" ], done );
 });
 
 
 /**
  * Build the project.
  */
-gulp.task( "build", [ 'tslint', 'compile', 'resources', 'libs' ], function() {
-    console.log( "Building the project ..." );
-});
+gulp.task( 'build', function ( done ) {
+  runSequence(
+    'clean',
+    [ 'sass2css', 'ts2js', 'resources', 'vendor' ],  // Run there tasks simultaneously.
+    done
+  )
+})
+
