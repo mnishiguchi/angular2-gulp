@@ -1,0 +1,31 @@
+<h2>
+  {{ hero.name }} details
+</h2>
+
+<div>
+  <label>id:</label>
+  {{ hero.id }}
+</div>
+
+<div>
+  <label>name:</label>
+  {{ hero.name }}
+</div>
+
+<div>
+  <label>
+    One-way data binding:
+    <input type="text"
+      value="{{ hero.name }}"
+      placeholder="name">
+  </label>
+
+  <br>
+
+  <label>
+    Two-way data binding:
+    <input type="text"
+      [(ngModel)]="hero.name"
+      placeholder="name">
+  </label>
+</div>

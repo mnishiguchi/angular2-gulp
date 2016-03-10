@@ -1,0 +1,46 @@
+<div class="container">
+
+  <h1>{{ title }}</h1>
+
+  <hr class="m-y-2">
+
+  <div class="col-md-5">
+
+    <ul class="heroes list-group">
+
+      <li *ngFor="#hero of heroes"
+        [class.selected]="isSelected( hero )"
+        (click)="onSelect( hero )"
+        class="list-group-item">
+
+        <span class="badge label label-default label-pill">
+          {{ hero.id }}
+        </span>
+        {{ hero.name }}
+
+      </li>
+
+    </ul>
+
+  </div>
+
+
+  <!--
+    NOTE: Since the selectedHero is undefined until a hero is selected, accessing
+    its properties will cause an exception. To avoid this problem, we can
+    keep the hero detail section out of the DOM until there is a selected hero.
+   -->
+
+
+  <div class="col-md-7">
+
+    <div *ngIf="selectedHero">
+
+      <hero-detail [hero]="selectedHero"></hero-detail>
+
+    </div>
+
+  </div>
+
+
+</div><!-- /.container -->

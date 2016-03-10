@@ -1,0 +1,32 @@
+.container {
+  margin-top: 40px;
+}
+
+
+.selected {
+  background-color: #CFD8DC !important;
+  color: white;
+}
+.heroes {
+  padding-bottom: 2em;
+}
+.selected {
+  background-color: #CFD8DC !important;
+  color: white;
+}
+.heroes li {
+  cursor: pointer;
+  background-color: #EEE;
+
+}
+.heroes li.selected:hover {
+  color: white;
+}
+.heroes li:hover {
+  color: #607D8B;
+  background-color: #EEE;
+}
+.heroes .badge {
+  background-color: #607D8B;
+  margin-right: 0.8em;
+}
